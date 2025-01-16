@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Display with More Information</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-image: url('https://www.google.com/imgres?q=weather%20background%20image&imgurl=https%3A%2F%2Fwallpapers.com%2Fimages%2Ffeatured%2Fweather-xqhs9axpy8btfd3y.jpg&imgrefurl=https%3A%2F%2Fwallpapers.com%2Fweather&docid=zOC8sqe0wuQUAM&tbnid=KxjPM4Sb3BS9pM&vet=12ahUKEwiei_3nzvmKAxWjzTgGHd5sNzQQM3oECGIQAA..i&w=1920&h=1080&hcb=2&ved=2ahUKEwiei_3nzvmKAxWjzTgGHd5sNzQQM3oECGIQAA'); /* Replace with a public image URL */
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            padding: 20px;
+            color: white;
+        }
+        h1 {
+            color: #eeb311;
+        }
+        .weather {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            display: inline-block;
+            color: white;
+        }
+        .city {
+            font-size: 1.5rem;
+            color: #d78100;
+        }
+        .temp, .wind-speed, .humidity, .visibility, .pressure {
+            font-size: 1.2rem;
+        }
+        .rotate {
+            animation: rotation 3s infinite linear;
+            display: inline-block;
+        }
+        @keyframes rotation {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .background-selector {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+        }
+        .background-selector label {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-selector">
+        <label for="bg-image">Change Background:</label>
+        <input type="file" id="bg-image" accept="image/*">
+    </div>
+    <h1>Weather in Jaipur, Delhi, Darbhanga, and Gurgaon</h1>
+    <div id="jaipur" class="weather"></div>
+    <div id="delhi" class="weather"></div>
+    <div id="darbhanga" class="weather"></div>
+    <div id="gurgaon" class="weather"></div>
+
+    <script>
+        const apiKey = 'ce94f53f14e91a79f2e024cf063dd5dc'; // Your API key
+        const cities = [
+            { name: 'Jaipur', id: 'jaipur' },
+            { name: 'Delhi', id: 'delhi' },
+            { name: 'Darbhanga', id: 'darbhanga' },
+            { name: 'Gurgaon', id: 'gurgaon' }
+        ];
+
+        async function fetchWeather(city) {
+            const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                displayWeather(data);
+            } catch (error) {
+                console.error(`Error fetching weather data for ${city}:`, error);
+                document.getElementById(city).innerHTML = `<p>Error fetching data</p>`;
+            }
+        }
+
+        function displayWeather(data) {
+            const cityId = data.name.toLowerCase();
+            const weatherHtml = `
+                <p class="city">${data.name}</p>
+                <p class="temp">Temperature: <span>${data.main.temp} °C</span></p>
+                <p class="wind-speed">Wind Speed: <span>${(data.wind.speed * 3.6).toFixed(1)} km/h</span></p>
+                <p class="wind-direction">Wind Direction: <span>${data.wind.deg}°</span></p>
+                <p class="humidity">Humidity: <span>${data.main.humidity}%</span></p>
+                <p class="visibility">Visibility: <span>${(data.visibility / 1000).toFixed(1)} km</span></p>
+                <p class="pressure">Pressure: <span>${data.main.pressure} hPa</span></p>
+                <div class="rotate">🌤️</div>
+            `;
+            document.getElementById(cityId).innerHTML = weatherHtml;
+        }
+
+        function refreshWeather() {
+            cities.forEach(city => fetchWeather(city.name));
+        }
+
+        document.getElementById('bg-image').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.body.style.backgroundImage = `url(${e.target.result})`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Initial fetch
+        refreshWeather();
+    </script>
+</body>
+</html>
